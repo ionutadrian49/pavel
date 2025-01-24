@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prima călătorie a lui Pavel</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+        }
+        .details {
+            margin: 20px auto;
+            width: 80%;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .details h3 {
+            color: #2c3e50;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+</head>
+<body>
+    <div id="map"></div>
+    <div class="details">
+        <h3>Detalii despre călătoria lui Pavel:</h3>
+        <p id="city-details">Apasă pe "Start" pentru a începe călătoria!</p>
+    </div>
+    <div style="text-align: center;">
+        <button onclick="startJourney()">Start</button>
+        <button onclick="pauseJourney()">Pauză</button>
+        <button onclick="resetJourney()">Reset</button>
+    </div>
+
+    <script>
+        const map = L.map('map').setView([37.9838, 23.7275], 6);
+
+        // Harta OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Coordonate orașe (detalii în traducerea lumii noi)
+        const cities = [
+            { name: "Antiohia", coords: [37.235, 36.945], details: "Locul de plecare al primei călătorii a lui Pavel (Faptele 13:1-3)." },
+            { name: "Seleucia", coords: [36.945, 35.895], details: "Portul din care Pavel și Barnaba au navigat spre Cipru." },
+            { name: "Salamina", coords: [35.171, 33.364], details: "Aici Pavel a predicat în sinagogile iudeilor (Faptele 13:5)." },
+            { name: "Pafos", coords: [34.776, 32.424], details: "Pavel l-a confruntat pe Elima, vrăjitorul (Faptele 13:6-12)." },
+            { name: "Perga", coords: [36.965, 30.851], details: "Aici Ioan Marcu s-a despărțit de ei (Faptele 13:13)." },
+            { name: "Antiohia Pisidiei", coords: [37.939, 30.335], details: "Pavel a predicat în sinagogă (Faptele 13:14-52)." },
+            { name: "Iconia", coords: [37.873, 32.505], details: "Mulți au devenit creștini, dar Pavel a fost amenințat (Faptele 14:1-6)." },
+            { name: "Listra", coords: [37.573, 32.070], details: "Pavel a vindecat un olog, dar a fost atacat cu pietre (Faptele 14:8-19)." },
+            { name: "Derbe", coords: [37.578, 33.379], details: "Mulți au fost convertiți în acest oraș (Faptele 14:20-21)." },
+            { name: "Antiohia", coords: [37.235, 36.945], details: "S-a întors la punctul de plecare (Faptele 14:26-28)." }
+        ];
+
+        let currentCityIndex = 0;
+        let polyline = L.polyline([], { color: 'blue', weight: 4 }).addTo(map);
+        let marker = L.marker(cities[0].coords).addTo(map);
+        let journeyInterval;
+
+        function updateDetails(city) {
+            document.getElementById("city-details").innerHTML = <strong>${city.name}</strong>: ${city.details};
+        }
+
+        function moveToNextCity() {
+            if (currentCityIndex < cities.length - 1) {
+                const nextCity = cities[currentCityIndex + 1];
+                polyline.addLatLng(nextCity.coords);
+                marker.setLatLng(nextCity.coords);
+                map.panTo(nextCity.coords);
+                currentCityIndex++;
+                updateDetails(nextCity);
+            } else {
+                clearInterval(journeyInterval);
+                alert("Călătoria s-a încheiat! Pavel s-a întors la Antiohia.");
+            }
+        }
+
+        function startJourney() {
+            if (journeyInterval) clearInterval(journeyInterval);
+            journeyInterval = setInterval(moveToNextCity, 2000);
+        }
+
+        function pauseJourney() {
+            clearInterval(journeyInterval);
+        }
+
+        function resetJourney() {
+            clearInterval(journeyInterval);
+            currentCityIndex = 0;
+            polyline.setLatLngs([cities[0].coords]);
+            marker.setLatLng(cities[0].coords);
+            map.setView(cities[0].coords, 6);
+            updateDetails(cities[0]);
+        }
+
+        updateDetails(cities[0]);
+    </script>
+</body>
+</html>
